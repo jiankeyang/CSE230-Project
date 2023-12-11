@@ -11,6 +11,7 @@ module Snake
     dead,
     food,
     score,
+    speedLevel,
     snake,
     height,
     width,
@@ -48,6 +49,10 @@ data Game = Game
     _paused :: Bool,
     -- | score
     _score :: Int,
+    -- | speed
+    _speedLevel :: Int,
+    -- | tick count
+    _tickCount :: Int,
     -- | lock to disallow duplicate turns between time steps
     _locked :: Bool,
     _barrier :: [Coord] -- barrier
@@ -81,6 +86,13 @@ width = 20
 -- | Step forward in time
 step :: Game -> Game
 step s = flip execState s . runMaybeT $ do
+  -- Increase tick count
+  MaybeT . fmap Just $ tickCount += 1
+
+  -- Check for speed level
+  currentTickCount <- lift $ use tickCount
+  currentSpeedLevel <- lift $ use speedLevel
+  guard (currentTickCount `mod` currentSpeedLevel == 0)
   -- Make sure the game isn't paused or over
   MaybeT $ guard . not <$> orM [use paused, use dead]
 
@@ -106,7 +118,12 @@ eatFood = do
   MaybeT . fmap guard $ (==) <$> (nextHead <$> get) <*> (use food)
   MaybeT . fmap Just $ do
     modifying score (+ 10)
-    get >>= \g -> modifying snake (nextHead g <|)
+    g <- get
+    let newSpeed = if g ^. score `mod` 50 == 0 && g ^. speedLevel > 1
+                   then (g ^. speedLevel) - 1
+                   else g ^. speedLevel
+    speedLevel .= newSpeed
+    modifying snake (nextHead g <|)
     nextFood
 
 -- | Set a valid next food coordinate
@@ -163,6 +180,8 @@ initGame = do
             _food = f,
             _foods = fs,
             _score = 0,
+            _speedLevel = 10,
+            _tickCount = 0,
             _dir = North,
             _dead = False,
             _paused = True,
