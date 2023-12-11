@@ -107,7 +107,7 @@ handleEvent g _ = continue g
 
 drawUI :: Game -> [Widget Name]
 drawUI g =
-  [C.center $ padRight (Pad 2) (drawStats g) <+> drawGrid g]
+  [C.center $ padRight (Pad 2) (drawTips <+> drawStats g) <+> drawGrid g]
 
 drawStats :: Game -> Widget Name
 drawStats g =
@@ -152,6 +152,14 @@ drawCell Food = withAttr foodAttr cw
 drawCell Barrier = withAttr barrierAttr cw
 drawCell Empty = withAttr emptyAttr cw
 
+drawTips :: Widget Name
+drawTips =
+  vBox
+    [ str "r: restart",
+      str "q: quit",
+      str "Arrow keys: move",
+      -- Add more tips as needed
+    ]
 cw :: Widget Name
 cw = str "  "
 
