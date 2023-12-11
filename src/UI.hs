@@ -107,7 +107,7 @@ handleEvent g _ = continue g
 
 drawUI :: Game -> [Widget Name]
 drawUI g =
-  [C.center $ padRight (Pad 2) (drawTips <+> drawStats g) <+> drawGrid g]
+  [C.center $ padRight (Pad 2) <+> drawStats g <+> drawGrid g]
 
 drawStats :: Game -> Widget Name
 drawStats g =
