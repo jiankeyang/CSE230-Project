@@ -119,7 +119,7 @@ eatFood = do
   MaybeT . fmap Just $ do
     modifying score (+ 10)
     g <- get
-    let newSpeed = if g ^. score `mod` 50 == 0
+    let newSpeed = if g ^. score `mod` 50 == 0 && g ^. speedLevel > 1
                    then (g ^. speedLevel) - 1
                    else g ^. speedLevel
     speedLevel .= newSpeed
