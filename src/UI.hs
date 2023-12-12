@@ -161,7 +161,7 @@ drawTips =
           vBox
             [ str " r: restart",
               str " q: quit",
-              str " Arrows: move"
+              str " arrows: move"
             ]
 cw :: Widget Name
 cw = str "  "
