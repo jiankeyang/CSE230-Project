@@ -115,7 +115,7 @@ drawStats g =
     vBox
       [ drawScore (g ^. score),
         padTop (Pad 2) $ drawGameOver (g ^. dead),
-        padTop (Pad 2) $ drawTips  
+        padTop (Pad 4) $ drawTips  
       ]
 
 drawScore :: Int -> Widget Name
