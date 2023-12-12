@@ -111,10 +111,11 @@ drawUI g =
 
 drawStats :: Game -> Widget Name
 drawStats g =
-  hLimit 11 $
+  hLimit 18 $  
     vBox
       [ drawScore (g ^. score),
-        padTop (Pad 2) $ drawGameOver (g ^. dead)
+        padTop (Pad 2) $ drawGameOver (g ^. dead),
+        padTop (Pad 4) $ drawTips  
       ]
 
 drawScore :: Int -> Widget Name
@@ -152,6 +153,16 @@ drawCell Food = withAttr foodAttr cw
 drawCell Barrier = withAttr barrierAttr cw
 drawCell Empty = withAttr emptyAttr cw
 
+drawTips =
+  withBorderStyle BS.unicodeBold $
+    B.borderWithLabel (str "Tips") $  -- Optional: Add a border with label
+      C.hCenter $
+        padAll 1 $
+          vBox
+            [ str " r: restart",
+              str " q: quit",
+              str " arrows: move"
+            ]
 cw :: Widget Name
 cw = str "  "
 

@@ -131,9 +131,18 @@ nextFood :: State Game ()
 nextFood = do
   (f :| fs) <- use foods
   foods .= fs
-  elem f <$> use snake >>= \case
-    True -> nextFood
-    False -> food .= f
+  snakeBody <- use snake
+  barriers <- use barrier
+  let isInvalidLocation coord = coord `elem` snakeBody || coord `elem` barriers
+  findValidFoodLocation f fs isInvalidLocation
+
+findValidFoodLocation :: Coord -> Stream Coord -> (Coord -> Bool) -> State Game ()
+findValidFoodLocation currentFood foodStream isInvalid = 
+  if isInvalid currentFood
+    then case foodStream of
+           (nextFood :| rest) -> findValidFoodLocation nextFood rest isInvalid
+    else food .= currentFood
+
 
 -- | Move snake along in a marquee fashion
 move :: Game -> Game
