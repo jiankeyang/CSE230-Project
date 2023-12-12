@@ -154,13 +154,15 @@ drawCell Barrier = withAttr barrierAttr cw
 drawCell Empty = withAttr emptyAttr cw
 
 drawTips =
-  withBorderStyle BS.unicode $
+  withBorderStyle BS.unicodeBold $
     B.borderWithLabel (str "Tips") $  -- Optional: Add a border with label
-      vBox
-        [ str " r: restart",
-          str " q: quit",
-          str " Arrows: move"
-        ]
+      C.hCenter $
+        padAll 1 $
+          vBox
+            [ str " r: restart",
+              str " q: quit",
+              str " Arrows: move"
+            ]
 cw :: Widget Name
 cw = str "  "
 
