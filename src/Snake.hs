@@ -173,16 +173,39 @@ turnDir n c
   | c `elem` [East, West] && n `elem` [North, South] = n
   | otherwise = c
 
+makeSquareBarrier :: Coord -> [Coord]
+makeSquareBarrier (V2 x y) = makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0..2], dy <- [0..2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
+
 -- | Initialize a paused game with random food location
 initGame :: IO Game
 initGame = do
   (f :| fs) <-
     fromList . randomRs (V2 0 0, V2 (width - 1) (height - 1)) <$> newStdGen
+
   let xm = width `div` 2
       ym = height `div` 2
-      mazePositions =
-        [V2 x 8 | x <- [2 .. width - 12]] -- Middle horizontal wall
-          ++ [V2 15 y | y <- [5 .. height - 8]] -- Middle vertical wall
+      squareBarriers :: [Coord]
+      squareBarriers = concatMap makeSquareBarrier squareTops
+        where
+          squareTops = [ V2 (width `div` 4 - 1) (height `div` 4 - 1),
+                 V2 (3 * width `div` 4 - 2) (height `div` 4 - 1),
+                 V2 (width `div` 4 - 1) (3 * height `div` 4 - 2),
+                 V2 (3 * width `div` 4 - 2) (3 * height `div` 4 - 2) ]
+      borderBarrier :: [Coord]
+      borderBarrier = topBottomBorder ++ leftRightBorder
+        where
+          gapSize = 6  -- The size of the opening in the center
+          gapStart = width `div` 2 - gapSize `div` 2
+
+          -- Top and Bottom borders with openings
+          topBottomBorder = [V2 x 0 | x <- [0..width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+                        ++ [V2 x (height - 1) | x <- [0..width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+
+          -- Left and Right borders with openings
+          leftRightBorder = [V2 0 y | y <- [1..height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+                          ++ [V2 (width - 1) y | y <- [1..height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+
+      mazePositions = squareBarriers ++ borderBarrier
       g =
         Game
           { _snake = S.singleton (V2 xm ym),
