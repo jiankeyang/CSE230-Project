@@ -80,6 +80,12 @@ makeLenses ''Game
 height, width :: Int
 height = 20
 width = 20
+squareCenters :: [Coord]
+squareCenters = [ V2 4 4,  -- Center of the first square
+                  V2 14 4, -- Center of the second square
+                  V2 4 14, -- Center of the third square
+                  V2 14 14 -- Center of the fourth square
+                ]
 
 -- Functions
 
@@ -133,7 +139,7 @@ nextFood = do
   foods .= fs
   snakeBody <- use snake
   barriers <- use barrier
-  let isInvalidLocation coord = coord `elem` snakeBody || coord `elem` barriers
+  let isInvalidLocation coord = coord `elem` snakeBody || coord `elem` barriers || coord `elem` squareCenters
   findValidFoodLocation f fs isInvalidLocation
 
 findValidFoodLocation :: Coord -> Stream Coord -> (Coord -> Bool) -> State Game ()
@@ -174,7 +180,7 @@ turnDir n c
   | otherwise = c
 
 makeSquareBarrier :: Coord -> [Coord]
-makeSquareBarrier (V2 x y) = makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0..2], dy <- [0..2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
+makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0..2], dy <- [0..2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
 
 -- | Initialize a paused game with random food location
 initGame :: IO Game
