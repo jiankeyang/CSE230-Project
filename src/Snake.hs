@@ -16,6 +16,7 @@ module Snake
     height,
     width,
     barrier,
+    timer
   )
 where
 
@@ -31,6 +32,8 @@ import Data.Sequence (Seq (..), (<|))
 import qualified Data.Sequence as S
 import Linear.V2 (V2 (..), _x, _y)
 import System.Random (Random (..), newStdGen)
+
+import Control.Monad (when)
 
 -- Types
 
@@ -55,7 +58,10 @@ data Game = Game
     _tickCount :: Int,
     -- | lock to disallow duplicate turns between time steps
     _locked :: Bool,
-    _barrier :: [Coord] -- barrier
+    -- barrier
+    _barrier :: [Coord],
+    -- Remaining time in seconds
+    _timer :: Int
   }
   deriving (Show)
 
@@ -74,6 +80,7 @@ data Direction
   deriving (Eq, Show)
 
 makeLenses ''Game
+
 
 -- Constants
 
@@ -105,8 +112,16 @@ step s = flip execState s . runMaybeT $ do
   -- Unlock from last directional turn
   MaybeT . fmap Just $ locked .= False
 
+  -- timer count down
+  -- guard (currentTickCount `mod` 10 == 0)
+  -- MaybeT . fmap Just $ timer %= (\t -> max 0 (t - 1))
+  let shouldUpdateTimer = currentTickCount `mod` 100 == 0
+  if shouldUpdateTimer
+    then timer %= (\t -> max 0 (t - 1))
+    else return ()
+
   -- die (moved into boundary), eat (moved into food), or move (move into space)
-  die <|> eatFood <|> MaybeT (Just <$> modify move)
+  die <|> eatFood <|> timeUp <|> MaybeT (Just <$> modify move)
 
 -- | Possibly die if next head position is in snake
 die :: MaybeT (State Game) ()
@@ -149,6 +164,11 @@ findValidFoodLocation currentFood foodStream isInvalid =
            (nextFood :| rest) -> findValidFoodLocation nextFood rest isInvalid
     else food .= currentFood
 
+timeUp :: MaybeT (State Game) ()
+timeUp = do
+  currentTimer <- lift $ use timer
+  guard (currentTimer == 0)
+  lift $ dead .= True
 
 -- | Move snake along in a marquee fashion
 move :: Game -> Game
@@ -224,7 +244,8 @@ initGame = do
             _dead = False,
             _paused = True,
             _locked = False,
-            _barrier = mazePositions
+            _barrier = mazePositions,
+            _timer = 10 -- Could be manually modified
           }
   return $ execState nextFood g
 

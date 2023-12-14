@@ -47,6 +47,8 @@ import qualified Graphics.Vty as V
 import Linear.V2 (V2 (..))
 import Snake
 
+
+
 -- Types
 
 -- | Ticks mark passing of time
@@ -109,13 +111,15 @@ drawUI :: Game -> [Widget Name]
 drawUI g =
   [C.center $ padRight (Pad 2) (drawStats g) <+> drawGrid g]
 
+
 drawStats :: Game -> Widget Name
 drawStats g =
   hLimit 18 $  
     vBox
       [ drawScore (g ^. score),
         padTop (Pad 2) $ drawGameOver (g ^. dead),
-        padTop (Pad 4) $ drawTips  
+        padTop (Pad 4) $ drawClock (g ^. timer),
+        padTop (Pad 2) $ drawTips  
       ]
 
 drawScore :: Int -> Widget Name
@@ -152,6 +156,26 @@ drawCell Snake = withAttr snakeAttr cw
 drawCell Food = withAttr foodAttr cw
 drawCell Barrier = withAttr barrierAttr cw
 drawCell Empty = withAttr emptyAttr cw
+
+
+drawClock :: Int -> Widget Name
+drawClock seconds =
+  withBorderStyle BS.unicodeBold $
+    B.borderWithLabel (str "Time") $
+      C.hCenter $
+        padAll 1 $
+          str $ formatTime seconds
+
+formatTime :: Int -> String
+formatTime seconds =
+  let (minutes, remainingSeconds) = divMod seconds 60
+      paddedMinutes = padZero 2 minutes
+      paddedSeconds = padZero 2 remainingSeconds
+  in paddedMinutes ++ ":" ++ paddedSeconds
+
+padZero :: Int -> Int -> String
+padZero width number = replicate (width - length (show number)) '0' ++ show number
+
 
 drawTips =
   withBorderStyle BS.unicodeBold $
