@@ -56,7 +56,7 @@ stack test
 ### Collaboration
 
 - Zhongming Yu: Random Map & Barrier Logic & Cover
-- Jianke Yang:
+- Jianke Yang: Dynamic game speed & Presentation
 - Yuhang Xie:
 - Yulei Liu: Timer & Tick Logic & Presentation
 
