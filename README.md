@@ -35,7 +35,7 @@ We plan to implement some of the add-on features listed below.
 <img src="snake.png" alt="drawing" width="60%"/>
 </p>
 
-![](snake.png)
+![](./snake.png)
 
 ### How to Run
 
@@ -67,4 +67,4 @@ stack test
 <p align="center">
 <img src="snake.gif" alt="gif" width="60%"/>
 </p>
-![](snake.gif)
+![](./snake.gif)
