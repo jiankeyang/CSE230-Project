@@ -63,7 +63,7 @@ data Game = Game
     -- remaining time in seconds
     _timer :: Int,
     -- the game level player is in
-    _currentLevel :: Level,
+    _currentLevel :: GameLevel
   }
   deriving (Show)
 
@@ -104,18 +104,18 @@ borderBarrier = topBottomBorder ++ leftRightBorder
     leftRightBorder =
       [V2 0 y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
         ++ [V2 (width - 1) y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
-data Level = Level
+data GameLevel = GameLevel
   { levelId :: Int,
     scoreThreshold :: Int,
     barrierLayout :: [Coord]
   }
-level1 :: Level
-level1 = Level 1 0 borderBarrier
+level1 :: GameLevel
+level1 = GameLevel 1 0 borderBarrier
 
-level2 :: Level
-level2 = Level 2 50 squareBarriers -- Define `anotherBarrierPattern` for this level
+level2 :: GameLevel
+level2 = GameLevel 2 50 squareBarriers -- Define `anotherBarrierPattern` for this level
 
-levels :: [Level]
+levels :: [GameLevel]
 levels = [level1, level2]
 
 makeLenses ''Game
