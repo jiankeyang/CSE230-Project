@@ -1,17 +1,11 @@
-name:                snake
-version:             0.1.0.0
-homepage:            https://github.com/SamTay/snake#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Sam Tay
-maintainer:          sam.chong.tay@pm.me
-copyright:           2021 Sam Tay
+name:                snake-cse
+version:              0.1
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  README.md
 
-executable snake
+executable snake-cse
   hs-source-dirs:      src
   other-modules:       Snake
                      , UI
