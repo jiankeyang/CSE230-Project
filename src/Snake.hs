@@ -208,10 +208,6 @@ turn d g =
     then g
     else g & dir %~ turnDir d & paused .~ False & locked .~ True
 
--- Change gameState from cover to playing
-changeGameState :: GameState -> Game -> Game
-changeGameState s g = g & gameState .~ s
-
 turnDir :: Direction -> Direction -> Direction
 turnDir n c
   | c `elem` [North, South] && n `elem` [East, West] = n
@@ -269,7 +265,7 @@ initGame = do
             _paused = True,
             _locked = False,
             _barrier = mazePositions,
-            _timer = 20, -- Could be manually modified
+            _timer = 50, -- Could be manually modified
             _gameState = Cover
           }
   return $ execState nextFood g

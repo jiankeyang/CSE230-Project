@@ -127,18 +127,21 @@ drawStats g =
       [ drawScore (g ^. score),
         padTop (Pad 2) $ drawClock (g ^. timer),
         padTop (Pad 2) $ drawTips,
-        padTop (Pad 1) $ drawGameOver (g ^. dead)
+        padTop (Pad 0) $ drawGameOver (g ^. dead)
       ]
 
 drawCover :: Widget Name
 drawCover =
   C.center $
     withBorderStyle BS.unicodeBold $
-      B.borderWithLabel (str "Welcome to Snake Game!") $
-        vBox
-          [ C.hCenter $ str "Haskell Snake Game",
-            C.hCenter $ str "Press any key to start"
-          ]
+      vBox
+        [ withAttr "redAttr" $ C.hCenter $ str " SSSSS  N   N  AAAAA  K   K  EEEEE",
+          withAttr "yellowAttr" $ C.hCenter $ str " SS     NN  N  A   A  K  K   E    ",
+          withAttr "greenAttr" $ C.hCenter $ str "   S    N N N  AAAAA  KKK    EEEE ",
+          withAttr "blueAttr" $ C.hCenter $ str "    SS  N  NN  A   A  K  K   E    ",
+          withAttr "magentaAttr" $ C.hCenter $ str " SSSSS  N   N  A   A  K   K  EEEEE",
+          C.hCenter $ padTop (Pad 2) $ str "Press any key to start"
+        ]
 
 drawScore :: Int -> Widget Name
 drawScore n =
@@ -214,7 +217,13 @@ theMap =
     [ (snakeAttr, V.blue `on` V.blue),
       (foodAttr, V.red `on` V.red),
       (gameOverAttr, fg V.red `V.withStyle` V.bold),
-      (barrierAttr, V.black `on` V.black)
+      (barrierAttr, V.black `on` V.black),
+      -- Rainbow color attributes
+      ("redAttr", fg V.red),
+      ("yellowAttr", fg V.yellow),
+      ("greenAttr", fg V.green),
+      ("blueAttr", fg V.blue),
+      ("magentaAttr", fg V.magenta)
     ]
 
 gameOverAttr :: AttrName
