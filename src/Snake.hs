@@ -127,9 +127,7 @@ step s = flip execState s . runMaybeT $ do
   -- guard (currentTickCount `mod` 10 == 0)
   -- MaybeT . fmap Just $ timer %= (\t -> max 0 (t - 1))
   let shouldUpdateTimer = currentTickCount `mod` 100 == 0
-  if shouldUpdateTimer
-    then timer %= (\t -> max 0 (t - 1))
-    else return ()
+  when shouldUpdateTimer $ timer %= (\t -> max 0 (t - 1))
 
   currentSpeedLevel <- lift $ use speedLevel
   guard (currentTickCount `mod` currentSpeedLevel == 0)

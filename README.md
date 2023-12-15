@@ -28,3 +28,32 @@ We plan to implement some of the add-on features listed below.
 - **Replay Functionality**: Provide a replay feature to allow players to view past games.
 - **Random Map**: Generate random maps with diverse boundaries and obstacles.
 - **Multiplayer Mode**: Explore the possibility of a local multiplayer mode where two players can compete on the same board.
+
+## MileStone
+
+![Snake](snake.png)
+
+### How to Run
+
+```
+stack build
+stack run
+stack test
+```
+
+### Final Features
+
+- **Cover**: The game welcomes players with an eye-catching cover screen, featuring a pixel-art style title and a prompt to start the game. This screen sets the tone and immerses players right from the beginning.
+- **Puzzle**: Challenging puzzles in the form of various barrier layouts are a core part of the game's experience. These include square barriers, cross barriers, diagonal barriers, and more, offering diverse challenges.
+- **Random Map**: Each game session offers a new experience with randomly generated maps. The layout of barriers and obstacles changes, requiring players to adapt their strategy each time they play.
+- **Dynamic Game Speed**:The game's speed dynamically adjusts as the player progresses, increasing the difficulty and excitement. This feature keeps players engaged and challenges their reflexive responses.
+- **Timer**: A timer is displayed, adding a sense of urgency and challenge. It encourages players to beat their best times, adding a competitive edge to the game.
+- **UnitTest**:The game's robustness is ensured through comprehensive unit testing, covering various aspects of the gameplay and mechanics. This guarantees a smooth and bug-free gaming experience.
+- **Tips&Help**: A dedicated section provides players with helpful tips and guidance. Whether you're a beginner or looking to improve your strategy, this section offers valuable insights to enhance your gameplay.
+
+### Collaboration
+
+- Zhongming Yu:
+- Jianke Yang:
+
+## Demo
