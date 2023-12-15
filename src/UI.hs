@@ -32,7 +32,7 @@ import Brick
     withBorderStyle,
     (<+>),
   )
-import Brick.BChan (newBChan, writeBChan)
+import Brick.BChan (BChan, newBChan, writeBChan)
 import qualified Brick.Widgets.Border as B
 import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.Center as C
@@ -77,37 +77,48 @@ app =
 main :: IO ()
 main = do
   chan <- newBChan 10
+  let builder = V.mkVty V.defaultConfig
+  initialVty <- builder
+  -- _ <- customMain initialVty builder Nothing coverApp ()
   forkIO $
     forever $ do
       writeBChan chan Tick
       threadDelay 10000 -- decides how fast your game moves
   g <- initGame
-  let builder = V.mkVty V.defaultConfig
-  initialVty <- builder
   void $ customMain initialVty builder (Just chan) app g
 
 -- Handling events
 
 handleEvent :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
-handleEvent g (AppEvent Tick) = continue $ step g
-handleEvent g (VtyEvent (V.EvKey V.KUp [])) = continue $ turn North g
-handleEvent g (VtyEvent (V.EvKey V.KDown [])) = continue $ turn South g
-handleEvent g (VtyEvent (V.EvKey V.KRight [])) = continue $ turn East g
-handleEvent g (VtyEvent (V.EvKey V.KLeft [])) = continue $ turn West g
-handleEvent g (VtyEvent (V.EvKey (V.KChar 'k') [])) = continue $ turn North g
-handleEvent g (VtyEvent (V.EvKey (V.KChar 'j') [])) = continue $ turn South g
-handleEvent g (VtyEvent (V.EvKey (V.KChar 'l') [])) = continue $ turn East g
-handleEvent g (VtyEvent (V.EvKey (V.KChar 'h') [])) = continue $ turn West g
-handleEvent g (VtyEvent (V.EvKey (V.KChar 'r') [])) = liftIO (initGame) >>= continue
-handleEvent g (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt g
-handleEvent g (VtyEvent (V.EvKey V.KEsc [])) = halt g
-handleEvent g _ = continue g
+handleEvent g event = case _gameState g of
+  Cover -> handleCoverEvent g event
+  Playing -> handlePlayingEvent g event
+
+handleCoverEvent :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
+handleCoverEvent g (VtyEvent (V.EvKey _ _)) = continue $ g {_gameState = Playing}
+handleCoverEvent g _ = continue g
+
+handlePlayingEvent :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
+handlePlayingEvent g (AppEvent Tick) = continue $ step g
+handlePlayingEvent g (VtyEvent (V.EvKey V.KUp [])) = continue $ turn North g
+handlePlayingEvent g (VtyEvent (V.EvKey V.KDown [])) = continue $ turn South g
+handlePlayingEvent g (VtyEvent (V.EvKey V.KRight [])) = continue $ turn East g
+handlePlayingEvent g (VtyEvent (V.EvKey V.KLeft [])) = continue $ turn West g
+handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'k') [])) = continue $ turn North g
+handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'j') [])) = continue $ turn South g
+handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'l') [])) = continue $ turn East g
+handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'h') [])) = continue $ turn West g
+handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'r') [])) = liftIO (initGame) >>= continue
+handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt g
+handlePlayingEvent g (VtyEvent (V.EvKey V.KEsc [])) = halt g
+handlePlayingEvent g _ = continue g
 
 -- Drawing
 
 drawUI :: Game -> [Widget Name]
-drawUI g =
-  [C.center $ padRight (Pad 2) (drawStats g) <+> drawGrid g]
+drawUI g = case _gameState g of
+  Cover -> [drawCover]
+  Playing -> [C.center $ padRight (Pad 2) (drawStats g) <+> drawGrid g]
 
 drawStats :: Game -> Widget Name
 drawStats g =
@@ -118,6 +129,16 @@ drawStats g =
         padTop (Pad 2) $ drawTips,
         padTop (Pad 1) $ drawGameOver (g ^. dead)
       ]
+
+drawCover :: Widget Name
+drawCover =
+  C.center $
+    withBorderStyle BS.unicodeBold $
+      B.borderWithLabel (str "Welcome to Snake Game!") $
+        vBox
+          [ C.hCenter $ str "Haskell Snake Game",
+            C.hCenter $ str "Press any key to start"
+          ]
 
 drawScore :: Int -> Widget Name
 drawScore n =

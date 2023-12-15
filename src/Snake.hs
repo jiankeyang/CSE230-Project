@@ -23,6 +23,8 @@ module Snake
     squareBarriers,
     borderBarrier,
     fromList,
+    gameState,
+    GameState (..),
   )
 where
 
@@ -65,8 +67,13 @@ data Game = Game
     -- barrier
     _barrier :: [Coord],
     -- Remaining time in seconds
-    _timer :: Int
+    _timer :: Int,
+    -- Game state
+    _gameState :: GameState
   }
+  deriving (Show)
+
+data GameState = Cover | Playing
   deriving (Show)
 
 type Coord = V2 Int
@@ -201,6 +208,10 @@ turn d g =
     then g
     else g & dir %~ turnDir d & paused .~ False & locked .~ True
 
+-- Change gameState from cover to playing
+changeGameState :: GameState -> Game -> Game
+changeGameState s g = g & gameState .~ s
+
 turnDir :: Direction -> Direction -> Direction
 turnDir n c
   | c `elem` [North, South] && n `elem` [East, West] = n
@@ -258,7 +269,8 @@ initGame = do
             _paused = True,
             _locked = False,
             _barrier = mazePositions,
-            _timer = 20 -- Could be manually modified
+            _timer = 20, -- Could be manually modified
+            _gameState = Cover
           }
   return $ execState nextFood g
 
