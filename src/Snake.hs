@@ -126,7 +126,7 @@ step s = flip execState s . runMaybeT $ do
   -- timer count down
   -- guard (currentTickCount `mod` 10 == 0)
   -- MaybeT . fmap Just $ timer %= (\t -> max 0 (t - 1))
-  let shouldUpdateTimer = currentTickCount `mod` 30 == 0
+  let shouldUpdateTimer = currentTickCount `mod` 100 == 0
   if shouldUpdateTimer
     then timer %= (\t -> max 0 (t - 1))
     else return ()
@@ -155,7 +155,7 @@ eatFood = do
     modifying score (+ 10)
     g <- get
     let newSpeed =
-          if g ^. score `mod` 50 == 0 && g ^. speedLevel > 1
+          if g ^. score `mod` 30 == 0 && g ^. speedLevel > 1
             then (g ^. speedLevel) - 1
             else g ^. speedLevel
     speedLevel .= newSpeed
@@ -249,10 +249,10 @@ makeCrossBarrier width height =
       lowY = height `div` 4
       highX = 3 * width `div` 4
       highY = 3 * height `div` 4
-   in [V2 highX y | y <- [0 .. lowY]]
-        ++ [V2 x lowY | x <- [0 .. lowX]]
-        ++ [V2 lowX y | y <- [highY - 1 .. height - 1]]
-        ++ [V2 x highY | x <- [highX - 1 .. width - 1]]
+   in [V2 (highX - 2) y | y <- [0 .. lowY + 1]]
+        ++ [V2 x (lowY + 1) | x <- [0 .. lowX + 1]]
+        ++ [V2 (lowX + 1) y | y <- [highY - 2 .. height - 1]]
+        ++ [V2 x (highY - 2) | x <- [highX - 2 .. width - 1]]
 
 crossBarriers :: [Coord]
 crossBarriers = makeCrossBarrier width height
