@@ -31,7 +31,9 @@ We plan to implement some of the add-on features listed below.
 
 ## MileStone
 
+<p align="center">
 <img src="snake.png" alt="drawing" width="60%"/>
+</p>
 
 ### How to Run
 
@@ -53,7 +55,7 @@ stack test
 
 ### Collaboration
 
-- Zhongming Yu:
+- Zhongming Yu: Random Map & Barrier Logic & Cover
 - Jianke Yang:
 - Yuhang Xie:
 - Yulei Liu:
