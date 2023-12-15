@@ -105,8 +105,7 @@ step s = flip execState s . runMaybeT $ do
 
   -- Check for speed level
   currentTickCount <- lift $ use tickCount
-  currentSpeedLevel <- lift $ use speedLevel
-  guard (currentTickCount `mod` currentSpeedLevel == 0)
+
   -- Make sure the game isn't paused or over
   MaybeT $ guard . not <$> orM [use paused, use dead]
 
@@ -120,6 +119,9 @@ step s = flip execState s . runMaybeT $ do
   if shouldUpdateTimer
     then timer %= (\t -> max 0 (t - 1))
     else return ()
+
+  currentSpeedLevel <- lift $ use speedLevel
+  guard (currentTickCount `mod` currentSpeedLevel == 0)
 
   -- die (moved into boundary), eat (moved into food), or move (move into space)
   die <|> eatFood <|> timeUp <|> MaybeT (Just <$> modify move)
