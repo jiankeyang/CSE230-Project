@@ -31,11 +31,12 @@ We plan to implement some of the add-on features listed below.
 
 ## MileStone
 
+<!--
 <p align="center">
 <img src="snake.png" alt="drawing" width="60%"/>
-</p>
+</p> -->
 
-![](./snake.png)
+![](https://raw.githubusercontent.com/jiankeyang/CSE230-Project/main/snake.png)
 
 ### How to Run
 
@@ -64,7 +65,11 @@ stack test
 
 ## Demo
 
+<!--
+
 <p align="center">
 <img src="snake.gif" alt="gif" width="60%"/>
 </p>
-![](./snake.gif)
+-->
+
+![](https://raw.githubusercontent.com/jiankeyang/CSE230-Project/main/snake.gif)
