@@ -89,10 +89,10 @@ width = 20
 
 squareCenters :: [Coord]
 squareCenters =
-  [ V2 4 4, -- Center of the first square
-    V2 14 4, -- Center of the second square
-    V2 4 14, -- Center of the third square
-    V2 14 14 -- Center of the fourth square
+  [ V2 5 5, -- Center of the first square
+    V2 15 5, -- Center of the second square
+    V2 5 15, -- Center of the third square
+    V2 15 15 -- Center of the fourth square
   ]
 
 -- Functions
