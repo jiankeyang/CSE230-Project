@@ -58,7 +58,7 @@ stack test
 - Zhongming Yu: Random Map & Barrier Logic & Cover
 - Jianke Yang:
 - Yuhang Xie:
-- Yulei Liu:
+- Yulei Liu: Timer & Tick Logic & Presentation
 
 ## Demo
 
