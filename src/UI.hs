@@ -104,10 +104,6 @@ handlePlayingEvent g (VtyEvent (V.EvKey V.KUp [])) = continue $ turn North g
 handlePlayingEvent g (VtyEvent (V.EvKey V.KDown [])) = continue $ turn South g
 handlePlayingEvent g (VtyEvent (V.EvKey V.KRight [])) = continue $ turn East g
 handlePlayingEvent g (VtyEvent (V.EvKey V.KLeft [])) = continue $ turn West g
-handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'k') [])) = continue $ turn North g
-handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'j') [])) = continue $ turn South g
-handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'l') [])) = continue $ turn East g
-handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'h') [])) = continue $ turn West g
 handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'r') [])) = liftIO (initGame) >>= continue
 handlePlayingEvent g (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt g
 handlePlayingEvent g (VtyEvent (V.EvKey V.KEsc [])) = halt g

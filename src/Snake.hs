@@ -126,7 +126,7 @@ step s = flip execState s . runMaybeT $ do
   -- timer count down
   -- guard (currentTickCount `mod` 10 == 0)
   -- MaybeT . fmap Just $ timer %= (\t -> max 0 (t - 1))
-  let shouldUpdateTimer = currentTickCount `mod` 100 == 0
+  let shouldUpdateTimer = currentTickCount `mod` 30 == 0
   if shouldUpdateTimer
     then timer %= (\t -> max 0 (t - 1))
     else return ()
@@ -243,15 +243,48 @@ borderBarrier = topBottomBorder ++ leftRightBorder
       [V2 0 y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
         ++ [V2 (width - 1) y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
 
+makeCrossBarrier :: Int -> Int -> [Coord]
+makeCrossBarrier width height =
+  let lowX = width `div` 4
+      lowY = height `div` 4
+      highX = 3 * width `div` 4
+      highY = 3 * height `div` 4
+   in [V2 highX y | y <- [0 .. lowY]]
+        ++ [V2 x lowY | x <- [0 .. lowX]]
+        ++ [V2 lowX y | y <- [highY - 1 .. height - 1]]
+        ++ [V2 x highY | x <- [highX - 1 .. width - 1]]
+
+crossBarriers :: [Coord]
+crossBarriers = makeCrossBarrier width height
+
+makeDiagonalBarrier :: Int -> Int -> [Coord]
+makeDiagonalBarrier width height =
+  [V2 x x | x <- [5 .. 8]] ++ [V2 x x | x <- [12 .. 15]]
+    ++ [V2 x (height - x - 1) | x <- [3 .. 6]]
+    ++ [V2 x (height - x - 1) | x <- [13 .. 16]]
+
+diagonalBarriers :: [Coord]
+diagonalBarriers = makeDiagonalBarrier width height
+
+selectBarrier :: Int -> [Coord]
+selectBarrier n = case n of
+  1 -> squareBarriers
+  2 -> borderBarrier
+  3 -> crossBarriers
+  4 -> diagonalBarriers
+  5 -> squareBarriers ++ borderBarrier
+  6 -> borderBarrier ++ crossBarriers
+  _ -> [] -- Fallback for any other number
+
 -- | Initialize a paused game with random food location
 initGame :: IO Game
 initGame = do
   (f :| fs) <-
     fromList . randomRs (V2 0 0, V2 (width - 1) (height - 1)) <$> newStdGen
-
+  randomNum <- randomRIO (1, 6)
   let xm = width `div` 2
       ym = height `div` 2
-      mazePositions = squareBarriers ++ borderBarrier
+      mazePositions = selectBarrier randomNum
       g =
         Game
           { _snake = S.singleton (V2 xm ym),
