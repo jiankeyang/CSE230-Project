@@ -128,13 +128,13 @@ borderBarrier = topBottomBorder ++ leftRightBorder
         ++ [V2 (width - 1) y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
 
 level1 :: GameLevel
-level1 = GameLevel 1 0 borderBarrier
+level1 = GameLevel 1 0 []
 
 level2 :: GameLevel
 level2 = GameLevel 2 50 borderBarrier -- Define `anotherBarrierPattern` for this level
 
 level3 :: GameLevel
-level3 = GameLevel 3 100 squareBarriers
+level3 = GameLevel 3 100 (borderBarrier ++ squareBarriers)
 glevels :: [GameLevel]
 glevels = [level1, level2, level3]
 
@@ -273,7 +273,8 @@ initGame = do
 
   let xm = width `div` 2
       ym = height `div` 2
-      mazePositions = []
+      initialLevel = head glevels
+      mazePositions = barrierLayout initialLevel
       g =
         Game
           { _snake = S.singleton (V2 xm ym),
@@ -288,7 +289,7 @@ initGame = do
             _locked = False,
             _barrier = mazePositions,
             _timer = 20, -- Could be manually modified
-            _currentLevel = head glevels
+            _currentLevel = initialLevel
           }
   return $ execState nextFood g
 
