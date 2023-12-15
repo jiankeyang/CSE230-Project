@@ -8,8 +8,10 @@ module Snake
     turn,
     Game (..),
     Direction (..),
+    Coord (..),
     dead,
     food,
+    move,
     score,
     speedLevel,
     snake,
@@ -153,7 +155,7 @@ eatFood = do
     modifying score (+ 10)
     g <- get
     let newSpeed =
-          if g ^. score `mod` 30 == 0 && g ^. speedLevel > 1
+          if g ^. score `mod` 20 == 0 && g ^. speedLevel > 1
             then (g ^. speedLevel) - 1
             else g ^. speedLevel
     speedLevel .= newSpeed

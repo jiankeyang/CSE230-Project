@@ -1,5 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+module FoodTest
+  ( initGameWithSeed,
+    prop_nextFoodPlacement,
+  )
+where
+
 import Control.Monad.State
 import qualified Data.Sequence as Seq
 import Linear.V2 (V2 (..))
@@ -47,14 +53,5 @@ prop_nextFoodPlacement = monadicIO $ do
   -- check if food is in a valid position
   assert $ foodLoc `notElem` mazePositions
 
--- | Test property for 'move' function
--- Add a similar structure for testing the 'move' function
-
 -- | Test property for 'turn' function
 -- Add a similar structure for testing the 'turn' function
-
--- | Main function to run all tests
-main :: IO ()
-main = do
-  putStrLn "Testing nextFood placement"
-  quickCheck prop_nextFoodPlacement
