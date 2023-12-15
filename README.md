@@ -31,12 +31,9 @@ We plan to implement some of the add-on features listed below.
 
 ## MileStone
 
-<!--
 <p align="center">
-<img src="snake.png" alt="drawing" width="60%"/>
-</p> -->
-
-![](https://raw.githubusercontent.com/jiankeyang/CSE230-Project/main/snake.png)
+<img src="https://raw.githubusercontent.com/jiankeyang/CSE230-Project/main/snake.png" alt="drawing" width="60%"/>
+</p>
 
 ### How to Run
 
@@ -65,11 +62,6 @@ stack test
 
 ## Demo
 
-<!--
-
 <p align="center">
-<img src="snake.gif" alt="gif" width="60%"/>
+<img src="https://raw.githubusercontent.com/jiankeyang/CSE230-Project/main/snake.gif" alt="gif" width="60%"/>
 </p>
--->
-
-![](https://raw.githubusercontent.com/jiankeyang/CSE230-Project/main/snake.gif)
