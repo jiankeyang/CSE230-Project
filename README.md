@@ -31,7 +31,7 @@ We plan to implement some of the add-on features listed below.
 
 ## MileStone
 
-![Snake](snake.png)
+<img src="snake.png" alt="drawing" width="60%"/>
 
 ### How to Run
 
@@ -55,5 +55,7 @@ stack test
 
 - Zhongming Yu:
 - Jianke Yang:
+- Yuhang Xie:
+- Yulei Liu:
 
 ## Demo
