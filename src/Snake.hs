@@ -60,8 +60,10 @@ data Game = Game
     _locked :: Bool,
     -- barrier
     _barrier :: [Coord],
-    -- Remaining time in seconds
-    _timer :: Int
+    -- remaining time in seconds
+    _timer :: Int,
+    -- the game level player is in
+    _currentLevel :: Level,
   }
   deriving (Show)
 
@@ -78,6 +80,43 @@ data Direction
   | East
   | West
   deriving (Eq, Show)
+squareBarriers :: [Coord]
+squareBarriers = concatMap makeSquareBarrier squareTops
+  where
+    squareTops =
+      [ V2 (width `div` 4 - 1) (height `div` 4 - 1),
+        V2 (3 * width `div` 4 - 2) (height `div` 4 - 1),
+        V2 (width `div` 4 - 1) (3 * height `div` 4 - 2),
+        V2 (3 * width `div` 4 - 2) (3 * height `div` 4 - 2)
+      ]
+borderBarrier :: [Coord]
+borderBarrier = topBottomBorder ++ leftRightBorder
+  where
+    gapSize = 6 -- The size of the opening in the center
+    gapStart = width `div` 2 - gapSize `div` 2
+
+    -- Top and Bottom borders with openings
+    topBottomBorder =
+      [V2 x 0 | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+        ++ [V2 x (height - 1) | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+
+    -- Left and Right borders with openings
+    leftRightBorder =
+      [V2 0 y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+        ++ [V2 (width - 1) y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+data Level = Level
+  { levelId :: Int,
+    scoreThreshold :: Int,
+    barrierLayout :: [Coord]
+  }
+level1 :: Level
+level1 = Level 1 0 borderBarrier
+
+level2 :: Level
+level2 = Level 2 50 squareBarriers -- Define `anotherBarrierPattern` for this level
+
+levels :: [Level]
+levels = [level1, level2]
 
 makeLenses ''Game
 
@@ -123,6 +162,14 @@ step s = flip execState s . runMaybeT $ do
 
   -- die (moved into boundary), eat (moved into food), or move (move into space)
   die <|> eatFood <|> timeUp <|> MaybeT (Just <$> modify move)
+
+  currentScore <- lift $ use score
+  let newLevel = find (\lvl -> currentScore >= scoreThreshold lvl) levels
+  case newLevel of
+    Just lvl -> lift $ do
+      currentLevel .= lvl
+      barrier .= barrierLayout lvl
+    Nothing -> return ()
 
 -- | Possibly die if next head position is in snake
 die :: MaybeT (State Game) ()
@@ -212,30 +259,30 @@ initGame = do
 
   let xm = width `div` 2
       ym = height `div` 2
-      squareBarriers :: [Coord]
-      squareBarriers = concatMap makeSquareBarrier squareTops
-        where
-          squareTops =
-            [ V2 (width `div` 4 - 1) (height `div` 4 - 1),
-              V2 (3 * width `div` 4 - 2) (height `div` 4 - 1),
-              V2 (width `div` 4 - 1) (3 * height `div` 4 - 2),
-              V2 (3 * width `div` 4 - 2) (3 * height `div` 4 - 2)
-            ]
-      borderBarrier :: [Coord]
-      borderBarrier = topBottomBorder ++ leftRightBorder
-        where
-          gapSize = 6 -- The size of the opening in the center
-          gapStart = width `div` 2 - gapSize `div` 2
+      -- squareBarriers :: [Coord]
+      -- squareBarriers = concatMap makeSquareBarrier squareTops
+      --   where
+      --     squareTops =
+      --       [ V2 (width `div` 4 - 1) (height `div` 4 - 1),
+      --         V2 (3 * width `div` 4 - 2) (height `div` 4 - 1),
+      --         V2 (width `div` 4 - 1) (3 * height `div` 4 - 2),
+      --         V2 (3 * width `div` 4 - 2) (3 * height `div` 4 - 2)
+      --       ]
+      -- borderBarrier :: [Coord]
+      -- borderBarrier = topBottomBorder ++ leftRightBorder
+      --   where
+      --     gapSize = 6 -- The size of the opening in the center
+      --     gapStart = width `div` 2 - gapSize `div` 2
 
-          -- Top and Bottom borders with openings
-          topBottomBorder =
-            [V2 x 0 | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
-              ++ [V2 x (height - 1) | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+      --     -- Top and Bottom borders with openings
+      --     topBottomBorder =
+      --       [V2 x 0 | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+      --         ++ [V2 x (height - 1) | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
 
-          -- Left and Right borders with openings
-          leftRightBorder =
-            [V2 0 y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
-              ++ [V2 (width - 1) y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+      --     -- Left and Right borders with openings
+      --     leftRightBorder =
+      --       [V2 0 y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+      --         ++ [V2 (width - 1) y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
 
       mazePositions = squareBarriers ++ borderBarrier
       g =
@@ -251,7 +298,8 @@ initGame = do
             _paused = True,
             _locked = False,
             _barrier = mazePositions,
-            _timer = 20 -- Could be manually modified
+            _timer = 20, -- Could be manually modified
+            _currentLevel = head levels
           }
   return $ execState nextFood g
 
