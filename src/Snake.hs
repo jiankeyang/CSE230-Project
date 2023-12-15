@@ -16,13 +16,15 @@ module Snake
     height,
     width,
     barrier,
-    timer
+    timer,
+    paused,
+    tickCount,
   )
 where
 
 import Control.Applicative ((<|>))
 import Control.Lens hiding ((:<), (:>), (<|), (|>))
-import Control.Monad (guard)
+import Control.Monad (guard, when)
 import Control.Monad.Extra (orM)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Maybe
@@ -32,8 +34,6 @@ import Data.Sequence (Seq (..), (<|))
 import qualified Data.Sequence as S
 import Linear.V2 (V2 (..), _x, _y)
 import System.Random (Random (..), newStdGen)
-
-import Control.Monad (when)
 
 -- Types
 
@@ -81,18 +81,19 @@ data Direction
 
 makeLenses ''Game
 
-
 -- Constants
 
 height, width :: Int
 height = 20
 width = 20
+
 squareCenters :: [Coord]
-squareCenters = [ V2 4 4,  -- Center of the first square
-                  V2 14 4, -- Center of the second square
-                  V2 4 14, -- Center of the third square
-                  V2 14 14 -- Center of the fourth square
-                ]
+squareCenters =
+  [ V2 4 4, -- Center of the first square
+    V2 14 4, -- Center of the second square
+    V2 4 14, -- Center of the third square
+    V2 14 14 -- Center of the fourth square
+  ]
 
 -- Functions
 
@@ -140,9 +141,10 @@ eatFood = do
   MaybeT . fmap Just $ do
     modifying score (+ 10)
     g <- get
-    let newSpeed = if g ^. score `mod` 50 == 0 && g ^. speedLevel > 1
-                   then (g ^. speedLevel) - 1
-                   else g ^. speedLevel
+    let newSpeed =
+          if g ^. score `mod` 50 == 0 && g ^. speedLevel > 1
+            then (g ^. speedLevel) - 1
+            else g ^. speedLevel
     speedLevel .= newSpeed
     modifying snake (nextHead g <|)
     nextFood
@@ -158,10 +160,10 @@ nextFood = do
   findValidFoodLocation f fs isInvalidLocation
 
 findValidFoodLocation :: Coord -> Stream Coord -> (Coord -> Bool) -> State Game ()
-findValidFoodLocation currentFood foodStream isInvalid = 
+findValidFoodLocation currentFood foodStream isInvalid =
   if isInvalid currentFood
     then case foodStream of
-           (nextFood :| rest) -> findValidFoodLocation nextFood rest isInvalid
+      (nextFood :| rest) -> findValidFoodLocation nextFood rest isInvalid
     else food .= currentFood
 
 timeUp :: MaybeT (State Game) ()
@@ -200,7 +202,7 @@ turnDir n c
   | otherwise = c
 
 makeSquareBarrier :: Coord -> [Coord]
-makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0..2], dy <- [0..2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
+makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0 .. 2], dy <- [0 .. 2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
 
 -- | Initialize a paused game with random food location
 initGame :: IO Game
@@ -213,23 +215,27 @@ initGame = do
       squareBarriers :: [Coord]
       squareBarriers = concatMap makeSquareBarrier squareTops
         where
-          squareTops = [ V2 (width `div` 4 - 1) (height `div` 4 - 1),
-                 V2 (3 * width `div` 4 - 2) (height `div` 4 - 1),
-                 V2 (width `div` 4 - 1) (3 * height `div` 4 - 2),
-                 V2 (3 * width `div` 4 - 2) (3 * height `div` 4 - 2) ]
+          squareTops =
+            [ V2 (width `div` 4 - 1) (height `div` 4 - 1),
+              V2 (3 * width `div` 4 - 2) (height `div` 4 - 1),
+              V2 (width `div` 4 - 1) (3 * height `div` 4 - 2),
+              V2 (3 * width `div` 4 - 2) (3 * height `div` 4 - 2)
+            ]
       borderBarrier :: [Coord]
       borderBarrier = topBottomBorder ++ leftRightBorder
         where
-          gapSize = 6  -- The size of the opening in the center
+          gapSize = 6 -- The size of the opening in the center
           gapStart = width `div` 2 - gapSize `div` 2
 
           -- Top and Bottom borders with openings
-          topBottomBorder = [V2 x 0 | x <- [0..width - 1], not (x >= gapStart && x < gapStart + gapSize)]
-                        ++ [V2 x (height - 1) | x <- [0..width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+          topBottomBorder =
+            [V2 x 0 | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
+              ++ [V2 x (height - 1) | x <- [0 .. width - 1], not (x >= gapStart && x < gapStart + gapSize)]
 
           -- Left and Right borders with openings
-          leftRightBorder = [V2 0 y | y <- [1..height - 2], not (y >= gapStart && y < gapStart + gapSize)]
-                          ++ [V2 (width - 1) y | y <- [1..height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+          leftRightBorder =
+            [V2 0 y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
+              ++ [V2 (width - 1) y | y <- [1 .. height - 2], not (y >= gapStart && y < gapStart + gapSize)]
 
       mazePositions = squareBarriers ++ borderBarrier
       g =
@@ -245,7 +251,7 @@ initGame = do
             _paused = True,
             _locked = False,
             _barrier = mazePositions,
-            _timer = 10 -- Could be manually modified
+            _timer = 20 -- Could be manually modified
           }
   return $ execState nextFood g
 
