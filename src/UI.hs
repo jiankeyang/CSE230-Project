@@ -114,10 +114,18 @@ drawStats g =
   hLimit 18 $
     vBox
       [ drawScore (g ^. score),
+       -- padTop (Pad 2) $ drawLevel (g ^. currentLevel),
         padTop (Pad 2) $ drawClock (g ^. timer),
         padTop (Pad 2) $ drawTips,
         padTop (Pad 1) $ drawGameOver (g ^. dead)
       ]
+drawLevel :: GameLevel -> Widget Name
+drawLevel lvl =
+  withBorderStyle BS.unicodeBold $
+    B.borderWithLabel (str "Level") $
+      C.hCenter $
+        padAll 1 $
+          str $ show (levelId lvl)
 
 drawScore :: Int -> Widget Name
 drawScore n =

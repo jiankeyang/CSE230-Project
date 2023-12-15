@@ -8,17 +8,20 @@ module Snake
     turn,
     Game (..),
     Direction (..),
+    GameLevel (..),
     dead,
     food,
     score,
     speedLevel,
     snake,
+    glevels,
     height,
     width,
     barrier,
     timer,
     paused,
     tickCount,
+    currentLevel,
   )
 where
 
@@ -34,6 +37,7 @@ import Data.Sequence (Seq (..), (<|))
 import qualified Data.Sequence as S
 import Linear.V2 (V2 (..), _x, _y)
 import System.Random (Random (..), newStdGen)
+import Data.List (find)
 
 -- Types
 
@@ -80,6 +84,13 @@ data Direction
   | East
   | West
   deriving (Eq, Show)
+height, width :: Int
+height = 20
+width = 20
+
+makeSquareBarrier :: Coord -> [Coord]
+makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0 .. 2], dy <- [0 .. 2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
+
 squareBarriers :: [Coord]
 squareBarriers = concatMap makeSquareBarrier squareTops
   where
@@ -108,23 +119,23 @@ data GameLevel = GameLevel
   { levelId :: Int,
     scoreThreshold :: Int,
     barrierLayout :: [Coord]
-  }
+  } deriving (Show)
 level1 :: GameLevel
 level1 = GameLevel 1 0 borderBarrier
 
 level2 :: GameLevel
 level2 = GameLevel 2 50 squareBarriers -- Define `anotherBarrierPattern` for this level
 
-levels :: [GameLevel]
-levels = [level1, level2]
+glevels :: [GameLevel]
+glevels = [level1, level2]
 
 makeLenses ''Game
 
 -- Constants
 
-height, width :: Int
-height = 20
-width = 20
+-- height, width :: Int
+-- height = 20
+-- width = 20
 
 squareCenters :: [Coord]
 squareCenters =
@@ -164,12 +175,14 @@ step s = flip execState s . runMaybeT $ do
   die <|> eatFood <|> timeUp <|> MaybeT (Just <$> modify move)
 
   currentScore <- lift $ use score
-  let newLevel = find (\lvl -> currentScore >= scoreThreshold lvl) levels
-  case newLevel of
-    Just lvl -> lift $ do
-      currentLevel .= lvl
-      barrier .= barrierLayout lvl
-    Nothing -> return ()
+  let newLevel = last . takeWhile (\lvl -> currentScore >= scoreThreshold lvl) $ glevels
+  currentLevelValue <- lift $ use currentLevel
+  let currentLevelId = levelId currentLevelValue
+  let newLevelId = levelId newLevel
+
+  when (newLevelId /= currentLevelId) $ lift $ do
+    currentLevel .= newLevel
+    barrier .= barrierLayout newLevel
 
 -- | Possibly die if next head position is in snake
 die :: MaybeT (State Game) ()
@@ -248,8 +261,8 @@ turnDir n c
   | c `elem` [East, West] && n `elem` [North, South] = n
   | otherwise = c
 
-makeSquareBarrier :: Coord -> [Coord]
-makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0 .. 2], dy <- [0 .. 2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
+-- makeSquareBarrier :: Coord -> [Coord]
+-- makeSquareBarrier (V2 x y) = [V2 (x + dx) (y + dy) | dx <- [0 .. 2], dy <- [0 .. 2], dx == 0 || dx == 2 || dy == 0 || dy == 2]
 
 -- | Initialize a paused game with random food location
 initGame :: IO Game
@@ -299,7 +312,7 @@ initGame = do
             _locked = False,
             _barrier = mazePositions,
             _timer = 20, -- Could be manually modified
-            _currentLevel = head levels
+            _currentLevel = head glevels
           }
   return $ execState nextFood g
 
