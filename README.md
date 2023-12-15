@@ -61,3 +61,7 @@ stack test
 - Yulei Liu:
 
 ## Demo
+
+<p align="center">
+<img src="snake.gif" alt="gif" width="60%"/>
+</p>
